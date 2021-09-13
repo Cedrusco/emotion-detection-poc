@@ -1,8 +1,19 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
+<div id="main-container" style="text-align: center">
   <h1>
     {{ title }}
   </h1>
   <video #userVideoStream id="userVideoStream" autoplay></video>
+  <button
+    mat-raised-button
+    color="accent"
+    class="record-btn"
+    (click)="(startRecognition)"
+  >
+    Record
+  </button>
+  <hr />
+  <div *ngIf="emotionData">
+    <h4>Emotion Data</h4>
+    <pre>{{ emotionData | json }}</pre>
+  </div>
 </div>
-

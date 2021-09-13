@@ -1,0 +1,11 @@
+#main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.record-btn {
+  width: 50%;
+  height: 50px;
+  font-weight: bolder;
+}

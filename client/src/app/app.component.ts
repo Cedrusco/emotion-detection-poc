@@ -7,6 +7,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 })
 export class AppComponent implements OnInit {
   title = 'Emotion Detection POC';
+  emotionData = {happy: 1, sad: 0.25, angry: 0, neutral: 0.5};
   videoNativeElement;
   @ViewChild('userVideoStream') userVideoStream;
 
