@@ -3,11 +3,12 @@
     {{ title }}
   </h1>
   <video #userVideoStream id="userVideoStream" autoplay></video>
+  <canvas #canvasToRenderUserImage style="display: none;"></canvas>
   <button
     mat-raised-button
     color="accent"
     class="record-btn"
-    (click)="(startRecognition)"
+    (click)="startRecognition()"
   >
     Record
   </button>

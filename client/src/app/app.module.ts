@@ -4,6 +4,8 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
+import { RecorderService } from './services/recorder/recorder.service';
+import { AudioUtilService } from './services/audioUtil/audio-util.service';
 
 @NgModule({
   declarations: [
@@ -14,7 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
     BrowserAnimationsModule,
     MatButtonModule,
   ],
-  providers: [],
+  providers: [RecorderService, AudioUtilService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
