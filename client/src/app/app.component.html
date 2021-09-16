@@ -9,10 +9,21 @@
     color="accent"
     class="record-btn"
     (click)="startRecognition()"
+    [disabled]="disableRecord"
   >
     Record
   </button>
   <hr />
+  <div id="snapshots">
+    <ul>
+      <li *ngFor="let url of faceImages">
+        <img src="{{url}}">
+      </li>
+    </ul>
+  </div>
+  <div id="audio">
+    <audio #audioPlayer type="audio/wav" controls></audio>
+  </div>
   <div *ngIf="emotionData">
     <h4>Emotion Data</h4>
     <pre>{{ emotionData | json }}</pre>
