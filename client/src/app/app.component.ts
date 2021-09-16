@@ -1,5 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { RecorderService } from './services/recorder/recorder.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
 import 'tracking/build/tracking';
 import 'tracking/build/data/face';
@@ -23,9 +22,8 @@ export class AppComponent implements OnInit {
   speechRecognition; // speech recognition api for browsers.
   audioContext; // represents audio processing graph.
   imageContext; // represents image with face.
-  tracking;
+  tracking; // face tracking.
 
-  audioBlob;
   faceImages = [];
   disableRecord;
   intervalId;
