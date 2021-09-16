@@ -4,7 +4,10 @@ import { RecorderService } from './services/recorder/recorder.service';
 import 'tracking/build/tracking';
 import 'tracking/build/data/face';
 
+import toWav from 'audiobuffer-to-wav';
+
 declare var tracking: any;
+declare var MediaRecorder: any;
 
 @Component({
   selector: 'app-root',
@@ -13,29 +16,28 @@ declare var tracking: any;
 })
 export class AppComponent implements OnInit {
   title = 'Emotion Detection POC';
-  emotionData = { happy: 1, sad: 0.25, angry: 0, neutral: 0.5 };
+  emotionData = { happy: 1, sad: 0.25, angry: 0, neutral: 0.5 }; // mock data.
   videoNativeElement; // html element where video is streamed.
   canvasNativeElement; // html element where image is stored.
-  audioPlayerElement;
+  audioPlayerElement; // html element where audio is stored.
   speechRecognition; // speech recognition api for browsers.
   audioContext; // represents audio processing graph.
   imageContext; // represents image with face.
-  analyser; // provides real time frequency analysis info for audio.
   tracking;
-  recorder;
 
   audioBlob;
   faceImages = [];
   disableRecord;
+  intervalId;
+
+  mediaRecorder;
+  recordedChunks = [];
 
   @ViewChild('userVideoStream') userVideoStream;
   @ViewChild('canvasToRenderUserImage') canvasToRenderUserImage;
   @ViewChild('audioPlayer') audioPlayer;
 
-  constructor(
-    private _recorderService: RecorderService,
-    private _cdRef: ChangeDetectorRef
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     this.videoNativeElement = <HTMLVideoElement>(
@@ -51,9 +53,7 @@ export class AppComponent implements OnInit {
     this.imageContext = this.canvasNativeElement.getContext('2d');
 
     this.speechRecognition = new (<any>window).webkitSpeechRecognition();
-    this.audioContext = new AudioContext();
-    this.analyser = this.audioContext.createAnalyser();
-    this._recorderService.init.call(this);
+    this.audioContext = new AudioContext({ sampleRate: 11025 });
 
     navigator.mediaDevices
       .getUserMedia({ video: { width: 500, height: 500 } })
@@ -81,48 +81,98 @@ export class AppComponent implements OnInit {
   }
 
   startRecognition() {
-    // this.disableRecord = true;/
+    this.disableRecord = true;
     this.faceImages = [];
-    this.audioPlayerElement.src = "";
+    this.audioPlayerElement.src = '';
     this.speechRecognition.start();
     this.analyzeVoice();
-    const intervalId = setInterval(this.analyzeFace.bind(this), 1000);
 
     this.speechRecognition.onresult = (event) => {
-      this.recorder.stop();
-      clearInterval(intervalId);
+      // this.recorder.stop();
+      this.disableRecord = false;
+      this.mediaRecorder.stop();
+      clearInterval(this.intervalId);
+      this.intervalId = '';
 
-      this.recorder.exportWAV((blob) => {
-        // this.disableRecord = false;
-        console.log(blob);
-        console.log(this.faceImages);
-
-        this.audioPlayerElement.src = window.URL.createObjectURL(blob);
-
-        // not calling external apis yet.
-        // let formData: FormData = new FormData();
-        // formData.append('apikey', environment.apiKeys.webEmpath);
-        // formData.append('wav', blob);
-        // this._webEmpathService.getUserEmotion(formData).subscribe(response => {
-        //   this.emotionData = response;
-        //   this._cdRef.detectChanges();
-        // });
-      }, 'audio/wav');
+      // not calling external apis yet.
+      // let formData: FormData = new FormData();
+      // formData.append('apikey', environment.apiKeys.webEmpath);
+      // formData.append('wav', blob);
+      // this._webEmpathService.getUserEmotion(formData).subscribe(response => {
+      //   this.emotionData = response;
+      //   this._cdRef.detectChanges();
+      // });
     };
   }
 
   analyzeVoice() {
-    navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(
-      (stream) => {
-        let input = this.audioContext.createMediaStreamSource(stream);
-        this.recorder = new (<any>window).Recorder(input);
-        input.connect(this.analyser);
-        this.recorder.record();
-      },
-      (e) => {
-        alert('Voice input is not available.');
-      }
-    );
+    navigator.mediaDevices
+      .getUserMedia({
+        video: false,
+        audio: { channelCount: 1, sampleRate: 11025 },
+      })
+      .then(
+        (stream) => {
+          this.recordedChunks = [];
+          this.mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'audio/webm',
+          });
+
+          this.mediaRecorder.addEventListener(
+            'dataavailable',
+            function (e) {
+              if (e.data.size > 0) this.recordedChunks.push(e.data);
+            }.bind(this)
+          );
+
+          this.mediaRecorder.addEventListener(
+            'stop',
+            function () {
+              const fileReader = new FileReader();
+
+              // Set up file reader on loaded end event
+              fileReader.onloadend = () => {
+                const arrayBuffer = fileReader.result as ArrayBuffer;
+
+                // Convert array buffer into audio buffer
+                this.audioContext.decodeAudioData(
+                  arrayBuffer,
+                  (audioBuffer) => {
+                    // Do something with audioBuffer
+                    const wav = toWav(audioBuffer);
+
+                    this.audioPlayerElement.src = window.URL.createObjectURL(
+                      new Blob([wav], { type: 'audio/wav' })
+                    );
+                  }
+                );
+              };
+
+              //Load blob
+              fileReader.readAsArrayBuffer(
+                new Blob(this.recordedChunks, {
+                  type: this.mediaRecorder.mimeType,
+                })
+              );
+            }.bind(this)
+          );
+
+          this.mediaRecorder.start();
+
+          setTimeout(() => {
+            if (this.intervalId) {
+              clearInterval(this.intervalId);
+              this.intervalId = '';
+              this.disableRecord = false;
+              this.mediaRecorder.stop();
+            }
+          }, 5000);
+          this.intervalId = setInterval(this.analyzeFace.bind(this), 1000);
+        },
+        (e) => {
+          alert('Voice input is not available.');
+        }
+      );
   }
 
   analyzeFace() {
