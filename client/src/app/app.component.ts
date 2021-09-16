@@ -16,6 +16,7 @@ export class AppComponent implements OnInit {
   emotionData = { happy: 1, sad: 0.25, angry: 0, neutral: 0.5 };
   videoNativeElement; // html element where video is streamed.
   canvasNativeElement; // html element where image is stored.
+  audioPlayerElement;
   speechRecognition; // speech recognition api for browsers.
   audioContext; // represents audio processing graph.
   imageContext; // represents image with face.
@@ -25,9 +26,11 @@ export class AppComponent implements OnInit {
 
   audioBlob;
   faceImages = [];
+  disableRecord;
 
   @ViewChild('userVideoStream') userVideoStream;
   @ViewChild('canvasToRenderUserImage') canvasToRenderUserImage;
+  @ViewChild('audioPlayer') audioPlayer;
 
   constructor(
     private _recorderService: RecorderService,
@@ -42,6 +45,9 @@ export class AppComponent implements OnInit {
     this.canvasNativeElement = <HTMLCanvasElement>(
       this.canvasToRenderUserImage.nativeElement
     );
+
+    this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
+
     this.imageContext = this.canvasNativeElement.getContext('2d');
 
     this.speechRecognition = new (<any>window).webkitSpeechRecognition();
@@ -53,29 +59,31 @@ export class AppComponent implements OnInit {
       .getUserMedia({ video: { width: 500, height: 500 } })
       .then((stream) => {
         this.videoNativeElement.srcObject = stream;
-      })
+      });
 
-      // hands free might be possible.
-      // have not gotten this to work yet.
-      
-      // this.speechRecognition.start(); 
+    // hands free might be possible.
+    // have not gotten this to work yet.
 
-      // this.speechRecognition.onspeechstart = (event) => {
-      //   console.log('speech started');
-      //   this.startRecognition();
-      // };
+    // this.speechRecognition.start();
 
-      // this.speechRecognition.onspeechend = (event) => {
-      //   console.log('speech ended');
-      // }
+    // this.speechRecognition.onspeechstart = (event) => {
+    //   console.log('speech started');
+    //   this.startRecognition();
+    // };
 
-      this.speechRecognition.onerror = (event) => {
-        console.log(event.message);
-      }
+    // this.speechRecognition.onspeechend = (event) => {
+    //   console.log('speech ended');
+    // }
+
+    this.speechRecognition.onerror = (event) => {
+      console.log(event.message);
+    };
   }
 
   startRecognition() {
+    // this.disableRecord = true;/
     this.faceImages = [];
+    this.audioPlayerElement.src = "";
     this.speechRecognition.start();
     this.analyzeVoice();
     const intervalId = setInterval(this.analyzeFace.bind(this), 1000);
@@ -85,8 +93,11 @@ export class AppComponent implements OnInit {
       clearInterval(intervalId);
 
       this.recorder.exportWAV((blob) => {
+        // this.disableRecord = false;
         console.log(blob);
         console.log(this.faceImages);
+
+        this.audioPlayerElement.src = window.URL.createObjectURL(blob);
 
         // not calling external apis yet.
         // let formData: FormData = new FormData();
@@ -130,7 +141,7 @@ export class AppComponent implements OnInit {
           this.canvasNativeElement.width,
           this.canvasNativeElement.height
         );
-        // this.videoNativeElement.srcObject.getVideoTracks().forEach(track => track.stop()); 
+        // this.videoNativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
         let userImage = this.canvasNativeElement.toDataURL('image/jpeg', 1);
         this.faceImages.push(userImage);
       }
