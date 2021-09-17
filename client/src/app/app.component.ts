@@ -4,6 +4,7 @@ import 'tracking/build/tracking';
 import 'tracking/build/data/face';
 
 import toWav from 'audiobuffer-to-wav';
+import { AnalyzerService } from './services/analyzer/analyzer.service';
 
 declare var tracking: any;
 declare var MediaRecorder: any;
@@ -35,7 +36,7 @@ export class AppComponent implements OnInit {
   @ViewChild('canvasToRenderUserImage') canvasToRenderUserImage;
   @ViewChild('audioPlayer') audioPlayer;
 
-  constructor() {}
+  constructor(public analyzer: AnalyzerService) {}
 
   ngOnInit() {
     this.videoNativeElement = <HTMLVideoElement>(
@@ -91,15 +92,6 @@ export class AppComponent implements OnInit {
       this.mediaRecorder.stop();
       clearInterval(this.intervalId);
       this.intervalId = '';
-
-      // not calling external apis yet.
-      // let formData: FormData = new FormData();
-      // formData.append('apikey', environment.apiKeys.webEmpath);
-      // formData.append('wav', blob);
-      // this._webEmpathService.getUserEmotion(formData).subscribe(response => {
-      //   this.emotionData = response;
-      //   this._cdRef.detectChanges();
-      // });
     };
   }
 
@@ -142,6 +134,26 @@ export class AppComponent implements OnInit {
                     this.audioPlayerElement.src = window.URL.createObjectURL(
                       new Blob([wav], { type: 'audio/wav' })
                     );
+
+                    // need to fix this binding.
+                    this.analyzer.analyze({
+                      voiceAudio: this.audioPlayerElement.src,
+                      faceImages: this.faceImages,
+                    }).subscribe(result => {
+                      console.log(result);
+                    });
+                    // send to server.
+                    // axios
+                    //   .post('/api/analyze', {
+                    //     voiceAudio: this.audioPlayerElement.src,
+                    //     faceImages: this.faceImages
+                    //   })
+                    //   .then((result) => {
+                    //     console.log(result);
+                    //   })
+                    //   .catch((e) => {
+                    //     console.error(e);
+                    //   });
                   }
                 );
               };
