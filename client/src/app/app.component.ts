@@ -47,7 +47,7 @@ export class AppComponent implements OnInit {
       this.canvasToRenderUserImage.nativeElement
     );
 
-    this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
+    // this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
 
     this.imageContext = this.canvasNativeElement.getContext('2d');
 
@@ -82,7 +82,7 @@ export class AppComponent implements OnInit {
   startRecognition() {
     this.disableRecord = true;
     this.faceImages = [];
-    this.audioPlayerElement.src = '';
+    // this.audioPlayerElement.src = '';
     this.speechRecognition.start();
     this.analyzeVoice();
 
@@ -131,14 +131,23 @@ export class AppComponent implements OnInit {
                     // Do something with audioBuffer
                     const wav = toWav(audioBuffer);
 
-                    this.audioPlayerElement.src = window.URL.createObjectURL(
-                      new Blob([wav], { type: 'audio/wav' })
+                    const audioBlob = new Blob([wav], { type: 'audio/wav' });
+
+                    // this.audioPlayerElement.src =
+                      // window.URL.createObjectURL(audioBlob);
+
+                    const formData = new FormData();
+
+                    formData.append(
+                      'faceImages',
+                      this.faceImages.map((image) => new Blob([image], { type: 'image/jpeg'}), {
+                        type: 'image/jpeg',
+                      })
                     );
 
-                    // need to fix this binding.
                     this.analyzer
                       .analyze({
-                        voiceAudio: this.audioPlayerElement.src,
+                        voiceAudio: audioBlob,
                         faceImages: this.faceImages,
                       })
                       .subscribe(
@@ -182,7 +191,7 @@ export class AppComponent implements OnInit {
               this.mediaRecorder.stop();
             }
           }, 5000);
-          this.intervalId = setInterval(this.analyzeFace.bind(this), 1000);
+          this.intervalId = setInterval(this.analyzeFace.bind(this), 500);
         },
         (e) => {
           alert('Voice input is not available.');
