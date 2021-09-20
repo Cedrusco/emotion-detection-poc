@@ -136,12 +136,17 @@ export class AppComponent implements OnInit {
                     );
 
                     // need to fix this binding.
-                    this.analyzer.analyze({
-                      voiceAudio: this.audioPlayerElement.src,
-                      faceImages: this.faceImages,
-                    }).subscribe(result => {
-                      console.log(result);
-                    });
+                    this.analyzer
+                      .analyze({
+                        voiceAudio: this.audioPlayerElement.src,
+                        faceImages: this.faceImages,
+                      })
+                      .subscribe(
+                        (result) => {
+                          console.log(result);
+                        },
+                        (e) => console.error(e)
+                      );
                     // send to server.
                     // axios
                     //   .post('/api/analyze', {

@@ -12,6 +12,6 @@ export class AnalyzerService {
   constructor(private http: HttpClient) { }
 
   analyze(userData) {
-    return this.http.post('/api/analyze', userData)
+    return this.http.post('/api/analyze', userData);
   }
 }
