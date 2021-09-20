@@ -4,16 +4,28 @@ const router = require('express').Router();
 
 router.post('/analyze', async (req, res) => {
   try {
-  const { voiceAudio, faceImages } = req.body;
+    const { voiceAudio, faceImages } = req.body;
 
-  console.log(voiceAudio, faceImages);
+    const faceClient = new AzureFaceAPI();
 
-  const faceClient = new AzureFaceAPI();
-  const imageUrl = faceImages[0];
+    const faceResults = [];
 
-  const result = await faceClient.analyzeFace(imageUrl);
+    for (let i = 0; i < faceImages.length; i++) {
+      const decodedImage = faceClient.decodeBase64Image(faceImages[i]);
+      const result = await faceClient.analyzeFace(decodedImage.data)
+      if (result) faceResults.push(result);
+    }
 
-  res.json({ voiceAudio, faceImages, result });
+    const averages = faceClient.computeAverageEmotions(faceResults);
+
+    res.json({
+      rawData: {
+        azureFaceAPIResults: {
+          resultsArray: faceResults,
+          resultsAverage: averages
+        }
+      },
+    });
   } catch (e) {
     res.json(e);
   }
