@@ -1,3 +1,5 @@
+const AzureFaceAPI = require('../api/azure/AzureFaceAPI');
+
 const router = require('express').Router();
 
 router.post('/analyze', (req, res) => {
@@ -5,7 +7,9 @@ router.post('/analyze', (req, res) => {
 
   console.log(voiceAudio, faceImages);
 
-  res.json({ voiceAudio, faceImages });
+  const faceClient = new AzureFaceAPI();
+
+  res.json({ voiceAudio, faceImages, faceClient });
 });
 
 module.exports = router;
