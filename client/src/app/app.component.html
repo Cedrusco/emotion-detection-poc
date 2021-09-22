@@ -1,31 +1,44 @@
-<div id="main-container" style="text-align: center">
-  <h1>
-    {{ title }}
-  </h1>
-  <video #userVideoStream id="userVideoStream" autoplay></video>
-  <canvas #canvasToRenderUserImage style="display: none;"></canvas>
-  <button
-    mat-raised-button
-    color="accent"
-    class="record-btn"
-    (click)="startRecognition()"
-    [disabled]="disableRecord"
-  >
-    Record
-  </button>
-  <hr />
-  <div id="snapshots">
-    <ul>
-      <li *ngFor="let url of faceImages">
-        <img src="{{url}}">
-      </li>
-    </ul>
+<div id="wrapper-container">
+  <div class="info">
+    <div id="audio" [ngClass]="{ hide: !audioPlayerElement.src }">
+      <audio #audioPlayer type="audio/wav" controls></audio>
+    </div>
+    <div id="snapshots">
+      <ul>
+        <li *ngFor="let url of faceImages">
+          <mat-card>
+            <img mat-card-img src="{{ url }}" />
+          </mat-card>
+        </li>
+      </ul>
+    </div>
   </div>
-  <!-- <div id="audio">
-    <audio #audioPlayer type="audio/wav" controls></audio>
-  </div> -->
-  <!-- <div *ngIf="emotionData">
-    <h4>Emotion Data</h4>
-    <pre>{{ emotionData | json }}</pre>
-  </div> -->
+  <div id="main-container" style="text-align: center">
+    <mat-card>
+      <h1>
+        {{ title }}
+      </h1>
+      <mat-card-content>
+        <video #userVideoStream id="userVideoStream" autoplay></video>
+      </mat-card-content>
+      <canvas #canvasToRenderUserImage style="display: none; width: 500; height: 500"></canvas>
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="accent"
+          class="record-btn"
+          (click)="startRecognition()"
+          [disabled]="disableRecord"
+        >
+          Record
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+  <div class="info">
+    <div *ngIf="emotionData">
+      <h4>Emotion Data</h4>
+      <pre>{{ emotionData | json }}</pre>
+    </div>
+  </div>
 </div>

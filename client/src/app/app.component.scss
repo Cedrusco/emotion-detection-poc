@@ -1,7 +1,19 @@
+#wrapper-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
 #main-container {
+  padding-top: 25px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+#audio, #snapshots {
+  width: fit-content;
+  margin: auto;
 }
 
 .record-btn {
@@ -9,4 +21,25 @@
   height: 50px;
   font-weight: bolder;
   margin-top: 20px;
+}
+
+.info {
+  padding-top: 12px;
+  margin-top: 24px;
+  width: 25%;
+  height: 90vh;
+  overflow: scroll;
+}
+
+.hide {
+  display: none;
+}
+
+ul {
+  list-style-type: none;
+  padding-inline-start: 0;
+}
+
+li {
+  padding-bottom: 10px;
 }
