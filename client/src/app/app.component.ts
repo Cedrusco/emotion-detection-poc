@@ -86,11 +86,11 @@ export class AppComponent implements OnInit {
     this.disableRecord = true;
     this.faceImages = [];
     this.audioPlayerElement.src = '';
+    this.emotionData = null;
     this.speechRecognition.start();
     this.analyzeVoice();
 
     this.speechRecognition.onresult = (event) => {
-      // this.recorder.stop();
       this.disableRecord = false;
       this.mediaRecorder.stop();
       clearInterval(this.intervalId);
@@ -108,7 +108,7 @@ export class AppComponent implements OnInit {
         (stream) => {
           this.recordedChunks = [];
           this.mediaRecorder = new MediaRecorder(stream, {
-            // mimeType: 'audio/webm',
+            mimeType: 'audio/webm',
           });
 
           this.mediaRecorder.addEventListener(
