@@ -6,6 +6,7 @@ import 'tracking/build/data/face';
 import toWav from 'audiobuffer-to-wav';
 import { AnalyzerService } from './services/analyzer/analyzer.service';
 import { AnalyzerResponse } from './services/analyzer/analyzer';
+import { read } from 'fs';
 
 declare var tracking: any;
 declare var MediaRecorder: any;
@@ -137,23 +138,29 @@ export class AppComponent implements OnInit {
                     const audioBlob = new Blob([wav], { type: 'audio/wav' });
 
                     this.audioPlayerElement.src =
-                    window.URL.createObjectURL(audioBlob);
+                      window.URL.createObjectURL(audioBlob);
 
-                    const formData = new FormData();
+                    // const formData = new FormData();
 
-                    formData.append(
-                      'faceImages',
-                      this.faceImages.map(
-                        (image) => new Blob([image], { type: 'image/jpeg' }),
-                        {
-                          type: 'image/jpeg',
-                        }
-                      )
-                    );
+                    // formData.append(
+                    //   'faceImages',
+                    //   this.faceImages.map(
+                    //     (image) => new Blob([image], { type: 'image/jpeg' }),
+                    //     {
+                    //       type: 'image/jpeg',
+                    //     }
+                    //   )
+                    // );
 
-                    this.analyzer
+                    var reader = new window.FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    let audioBase64;
+                    reader.onloadend = function () {
+                      audioBase64 = reader.result;
+
+                      this.analyzer
                       .analyze({
-                        voiceAudio: audioBlob,
+                        voiceAudio: audioBase64,
                         faceImages: this.faceImages,
                       })
                       .subscribe(
@@ -162,6 +169,7 @@ export class AppComponent implements OnInit {
                         },
                         (e) => console.error(e)
                       );
+                    }.bind(this);
                   }
                 );
               };
