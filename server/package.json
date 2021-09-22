@@ -13,8 +13,10 @@
   "dependencies": {
     "@azure/cognitiveservices-face": "^4.2.0",
     "@azure/ms-rest-js": "^2.6.0",
+    "axios": "^0.21.4",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "form-data": "^4.0.0",
     "ibm-watson": "^6.1.2",
     "nodemon": "^2.0.12"
   }

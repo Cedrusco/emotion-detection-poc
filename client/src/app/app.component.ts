@@ -5,6 +5,8 @@ import 'tracking/build/data/face';
 
 import toWav from 'audiobuffer-to-wav';
 import { AnalyzerService } from './services/analyzer/analyzer.service';
+import { AnalyzerResponse } from './services/analyzer/analyzer';
+import { read } from 'fs';
 
 declare var tracking: any;
 declare var MediaRecorder: any;
@@ -16,7 +18,7 @@ declare var MediaRecorder: any;
 })
 export class AppComponent implements OnInit {
   title = 'Emotion Detection POC';
-  emotionData = { happy: 1, sad: 0.25, angry: 0, neutral: 0.5 }; // mock data.
+  emotionData: AnalyzerResponse;
   videoNativeElement; // html element where video is streamed.
   canvasNativeElement; // html element where image is stored.
   audioPlayerElement; // html element where audio is stored.
@@ -47,7 +49,7 @@ export class AppComponent implements OnInit {
       this.canvasToRenderUserImage.nativeElement
     );
 
-    // this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
+    this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
 
     this.imageContext = this.canvasNativeElement.getContext('2d');
 
@@ -55,7 +57,9 @@ export class AppComponent implements OnInit {
     this.audioContext = new AudioContext({ sampleRate: 11025 });
 
     navigator.mediaDevices
-      .getUserMedia({ video: { width: 500, height: 500 } })
+      .getUserMedia({
+        video: { width: { ideal: 500 }, height: { ideal: 500 } },
+      })
       .then((stream) => {
         this.videoNativeElement.srcObject = stream;
       });
@@ -82,12 +86,12 @@ export class AppComponent implements OnInit {
   startRecognition() {
     this.disableRecord = true;
     this.faceImages = [];
-    // this.audioPlayerElement.src = '';
+    this.audioPlayerElement.src = '';
+    this.emotionData = null;
     this.speechRecognition.start();
     this.analyzeVoice();
 
     this.speechRecognition.onresult = (event) => {
-      // this.recorder.stop();
       this.disableRecord = false;
       this.mediaRecorder.stop();
       clearInterval(this.intervalId);
@@ -133,41 +137,39 @@ export class AppComponent implements OnInit {
 
                     const audioBlob = new Blob([wav], { type: 'audio/wav' });
 
-                    // this.audioPlayerElement.src =
-                      // window.URL.createObjectURL(audioBlob);
+                    this.audioPlayerElement.src =
+                      window.URL.createObjectURL(audioBlob);
 
-                    const formData = new FormData();
+                    // const formData = new FormData();
 
-                    formData.append(
-                      'faceImages',
-                      this.faceImages.map((image) => new Blob([image], { type: 'image/jpeg'}), {
-                        type: 'image/jpeg',
-                      })
-                    );
+                    // formData.append(
+                    //   'faceImages',
+                    //   this.faceImages.map(
+                    //     (image) => new Blob([image], { type: 'image/jpeg' }),
+                    //     {
+                    //       type: 'image/jpeg',
+                    //     }
+                    //   )
+                    // );
 
-                    this.analyzer
+                    var reader = new window.FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    let audioBase64;
+                    reader.onloadend = function () {
+                      audioBase64 = reader.result;
+
+                      this.analyzer
                       .analyze({
-                        voiceAudio: audioBlob,
+                        voiceAudio: audioBase64,
                         faceImages: this.faceImages,
                       })
                       .subscribe(
                         (result) => {
-                          console.log(result);
+                          this.emotionData = result;
                         },
                         (e) => console.error(e)
                       );
-                    // send to server.
-                    // axios
-                    //   .post('/api/analyze', {
-                    //     voiceAudio: this.audioPlayerElement.src,
-                    //     faceImages: this.faceImages
-                    //   })
-                    //   .then((result) => {
-                    //     console.log(result);
-                    //   })
-                    //   .catch((e) => {
-                    //     console.error(e);
-                    //   });
+                    }.bind(this);
                   }
                 );
               };
@@ -182,6 +184,7 @@ export class AppComponent implements OnInit {
           );
 
           this.mediaRecorder.start();
+          this.intervalId = setInterval(this.analyzeFace.bind(this), 500);
 
           setTimeout(() => {
             if (this.intervalId) {
@@ -191,7 +194,6 @@ export class AppComponent implements OnInit {
               this.mediaRecorder.stop();
             }
           }, 5000);
-          this.intervalId = setInterval(this.analyzeFace.bind(this), 500);
         },
         (e) => {
           alert('Voice input is not available.');

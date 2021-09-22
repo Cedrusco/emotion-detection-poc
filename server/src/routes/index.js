@@ -1,4 +1,5 @@
 const AzureFaceAPI = require('../api/azure/AzureFaceAPI');
+const EmpathClient = require('../api/empath/EmpathWebAPI');
 
 const router = require('express').Router();
 
@@ -17,13 +18,15 @@ router.post('/analyze', async (req, res) => {
     }
 
     const averages = faceClient.computeAverageEmotions(faceResults);
+    const empathResults = await EmpathClient.analyzeAudio(faceClient.decodeBase64Image(voiceAudio).data);
 
     res.json({
       rawData: {
         azureFaceAPIResults: {
           resultsArray: faceResults,
           resultsAverage: averages
-        }
+        },
+        empathWebAPIResults: empathResults
       },
     });
   } catch (e) {

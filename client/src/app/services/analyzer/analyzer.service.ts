@@ -1,17 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { AnalyzerResponse } from './analyzer';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AnalyzerService {
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  analyze(userData) {
-    return this.http.post('/api/analyze', userData);
+  analyze(userData): Observable<AnalyzerResponse> {
+    return this.http.post<AnalyzerResponse>('/api/analyze', userData);
   }
 }
