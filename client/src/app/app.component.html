@@ -6,7 +6,7 @@
     <div id="snapshots">
       <ul>
         <li *ngFor="let url of faceImages">
-          <mat-card>
+          <mat-card [ngClass]="{'custom-card': true}">
             <img mat-card-img src="{{ url }}" />
           </mat-card>
         </li>
@@ -14,7 +14,7 @@
     </div>
   </div>
   <div id="main-container" style="text-align: center">
-    <mat-card>
+    <mat-card [ngClass]="{'custom-card': true}">
       <h1>
         {{ title }}
       </h1>
