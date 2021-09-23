@@ -1,9 +1,9 @@
 export interface AnalyzerResponse {
   emotion: string;
   rawData: {
-    watsonToneAnalyzerResults: WatsonToneAnalyzerResults;
     azureFaceAPIResutls: AzureFaceAPIResultsArray;
     empathWebAPIResults: EmpathWebAPIResults;
+    watsonToneAnalyzerResults: WatsonToneAnalyzerResults;
   };
 }
 
