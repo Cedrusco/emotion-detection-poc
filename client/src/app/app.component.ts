@@ -34,6 +34,8 @@ export class AppComponent implements OnInit {
   mediaRecorder;
   recordedChunks = [];
 
+  apiResponsePending = false;
+
   @ViewChild('userVideoStream') userVideoStream;
   @ViewChild('canvasToRenderUserImage') canvasToRenderUserImage;
   @ViewChild('audioPlayer') audioPlayer;
@@ -157,7 +159,7 @@ export class AppComponent implements OnInit {
                     let audioBase64;
                     reader.onloadend = function () {
                       audioBase64 = reader.result;
-
+                      this.apiResponsePending = true
                       this.analyzer
                         .analyze({
                           voiceAudio: audioBase64,
@@ -165,9 +167,13 @@ export class AppComponent implements OnInit {
                         })
                         .subscribe(
                           (result) => {
+                            this.apiResponsePending = false;
                             this.emotionData = result;
                           },
-                          (e) => console.error(e)
+                          (e) => {
+                            this.apiResponsePending = false;
+                            console.error(e);
+                          }
                         );
                     }.bind(this);
                   }
