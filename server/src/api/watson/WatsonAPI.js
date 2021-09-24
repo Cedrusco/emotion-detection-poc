@@ -25,10 +25,16 @@ class WatsonAPI {
     try {
       const sttParams = {
         audio,
-        model: 'en-US_NarrowbandModel'
+        model: 'en-US_NarrowbandModel',
+        contentType: 'application/octet-stream',
       };
 
-      return (await this.client.speechToTextAPI.recognize(sttParams)).results[0]
+      const sttResult = await this.client.speechToTextAPI.recognize(sttParams);
+      if (sttResult) {
+        return sttResult.result.results[0].alternatives[0].transcript;
+      } else {
+        throw new Error('stt failed to transcribe to audio to text');
+      }
     } catch (e) {
       console.error(e);
       throw new Error('speechToText method failed');
@@ -37,14 +43,19 @@ class WatsonAPI {
 
   async analyzeSemanticTone(audio) {
     try {
-      const toneInput =await this.speechToText(audio);
+      const text = await this.speechToText(audio);
 
       const toneParams = {
-        toneInput,
+        toneInput: { text },
         contentType: 'application/json',
       };
 
-      return await this.client.toneAnalyzerAPI.tone(toneParams);
+      const toneResult = await this.client.toneAnalyzerAPI.tone(toneParams);
+      if (toneResult) {
+        return { text, toneResult: toneResult.result};
+      } else {
+        throw new Error('toneAnalyzer failed to detect tone of text');
+      }
     } catch (e) {
       console.error(e);
       throw new Error('analyzeSemanticTone method failed');
