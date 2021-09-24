@@ -1,16 +1,16 @@
 export interface AnalyzerResponse {
   emotion: string;
   rawData: {
-    watsonToneAnalyzerResults: WatsonToneAnalyzerResults;
     azureFaceAPIResutls: AzureFaceAPIResultsArray;
     empathWebAPIResults: EmpathWebAPIResults;
+    watsonToneAnalyzerResults: WatsonToneAnalyzerResults;
   };
 }
 
 interface WatsonToneAnalyzerResults {
-  document_tone: [{ score: number; tone_id: String }];
+  document_tone: [{ score: number; tone_id: string, tone_name: string }];
   sentences_tone: [
-    { text: string; tones: [{ score: number; tone_id: string }] }
+    { text: string; tones: [{ score: number; tone_id: string, tone_name: string }] }
   ];
 }
 

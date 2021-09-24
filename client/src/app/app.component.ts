@@ -6,8 +6,8 @@ import 'tracking/build/data/face';
 import toWav from 'audiobuffer-to-wav';
 import { AnalyzerService } from './services/analyzer/analyzer.service';
 import { AnalyzerResponse } from './services/analyzer/analyzer';
-import { read } from 'fs';
 
+declare var window: any;
 declare var tracking: any;
 declare var MediaRecorder: any;
 
@@ -159,16 +159,16 @@ export class AppComponent implements OnInit {
                       audioBase64 = reader.result;
 
                       this.analyzer
-                      .analyze({
-                        voiceAudio: audioBase64,
-                        faceImages: this.faceImages,
-                      })
-                      .subscribe(
-                        (result) => {
-                          this.emotionData = result;
-                        },
-                        (e) => console.error(e)
-                      );
+                        .analyze({
+                          voiceAudio: audioBase64,
+                          faceImages: this.faceImages,
+                        })
+                        .subscribe(
+                          (result) => {
+                            this.emotionData = result;
+                          },
+                          (e) => console.error(e)
+                        );
                     }.bind(this);
                   }
                 );
