@@ -1,39 +1,23 @@
-const {AzureFaceAPI, WatsonAPI, EmpathWebAPI }  = require('../api/');
+const { AnalyzeAPI } = require('../api/');
 
 const router = require('express').Router();
 
 router.post('/analyze', async (req, res) => {
   try {
-    const { voiceAudio, faceImages } = req.body;
+    const { faceImages, voiceAudio } = req.body;
 
-    const faceClient = new AzureFaceAPI();
-    const watsonClient = new WatsonAPI();
+    const analyzeAPI = new AnalyzeAPI();
 
-    const faceResults = [];
+    const rawData = await analyzeAPI.analyze(faceImages, voiceAudio);
+    const emotion = analyzeAPI.calculateEmotion(
+      process.env.FACE_WEIGHT,
+      process.env.AUDIO_WEIGHT,
+      process.env.SEMANTIC_WEIGHT
+    );
 
-    for (let i = 0; i < faceImages.length; i++) {
-      const decodedImage = faceClient.decodeBase64Image(faceImages[i]);
-      const result = await faceClient.analyzeFace(decodedImage.data)
-      if (result) faceResults.push(result);
-    }
-
-    const averages = faceClient.computeAverageEmotions(faceResults);
-
-    const decodedAudio = faceClient.decodeBase64Image(voiceAudio);
-    const empathResults = await EmpathWebAPI.analyzeAudio(decodedAudio.data);
-    const watsonResults = await watsonClient.analyzeSemanticTone(decodedAudio.data);
-
-    res.json({
-      rawData: {
-        azureFaceAPIResults: {
-          resultsArray: faceResults,
-          resultsAverage: averages
-        },
-        empathWebAPIResults: empathResults,
-        watsonToneAnalyzerResults: watsonResults
-      },
-    });
+    res.json({ emotion, rawData });
   } catch (e) {
+    console.error(e);
     res.json(e);
   }
 });
