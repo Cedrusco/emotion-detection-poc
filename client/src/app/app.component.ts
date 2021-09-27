@@ -96,6 +96,7 @@ export class AppComponent implements OnInit {
     this.speechRecognition.onresult = (event) => {
       this.disableRecord = false;
       this.mediaRecorder.stop();
+      this.apiResponsePending = true
       clearInterval(this.intervalId);
       this.intervalId = '';
     };
@@ -148,7 +149,6 @@ export class AppComponent implements OnInit {
                     
                     reader.onloadend = function () {
                       audioBase64 = reader.result;
-                      this.apiResponsePending = true
                       this.analyzer
                         .analyze({
                           voiceAudio: audioBase64,
