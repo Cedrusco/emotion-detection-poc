@@ -74,7 +74,7 @@ class AnalyzeAPI {
     const rawData = this.result?.empathWebAPIResults;
 
     for (let key in rawData) {
-      if ({}.hasOwnProperty.call(resultObject, key)) {
+      if ({}.hasOwnProperty.call(rawData, key)) {
         if (!resultObject[emotionMap[key]]) {
           resultObject[emotionMap[key]] = 0;
         }
@@ -87,7 +87,7 @@ class AnalyzeAPI {
     const rawData = this.result?.azureFaceAPIResults?.resultsAverage;
 
     for (let key in rawData) {
-      if ({}.hasOwnProperty.call(resultObject, key)) {
+      if ({}.hasOwnProperty.call(rawData, key)) {
         if (!resultObject[emotionMap[key]]) {
           resultObject[emotionMap[key]] = 0;
         }
