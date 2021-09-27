@@ -1,20 +1,20 @@
 <div id="wrapper-container">
-  <div class="info">
+  <!-- <div class="info">
     <div id="audio" [ngClass]="{ hide: !audioPlayerElement.src }">
       <audio #audioPlayer type="audio/wav" controls></audio>
     </div>
     <div id="snapshots">
       <ul>
         <li *ngFor="let url of faceImages">
-          <mat-card [ngClass]="{'custom-card': true}">
+          <mat-card [ngClass]="{ 'custom-card': true }">
             <img mat-card-img src="{{ url }}" />
           </mat-card>
         </li>
       </ul>
     </div>
-  </div>
+  </div> -->
   <div id="main-container" style="text-align: center">
-    <mat-card [ngClass]="{'custom-card': true}">
+    <mat-card [ngClass]="{ 'custom-card': true }">
       <h1>
         {{ title }}
       </h1>
@@ -36,6 +36,12 @@
     </mat-card>
   </div>
   <div class="info">
+    <mat-progress-spinner
+      id="spinner"
+      color="accent"
+      mode="indeterminate"
+      [ngClass]="{ 'hide': !apiResponsePending }"
+    ></mat-progress-spinner>
     <div *ngIf="emotionData">
       <h4>Emotion Data</h4>
       <pre>{{ emotionData | json }}</pre>
