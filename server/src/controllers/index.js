@@ -1,1 +1,5 @@
-// TODO move logic in route, to a function here
+function analyze() {
+  
+}
+
+module.exports = { analyze };

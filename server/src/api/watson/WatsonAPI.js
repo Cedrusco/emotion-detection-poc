@@ -31,7 +31,7 @@ class WatsonAPI {
 
       const sttResult = await this.client.speechToTextAPI.recognize(sttParams);
       if (sttResult.status === 200) {
-        return sttResult.result.results[0].alternatives[0].transcript;
+        return sttResult.result?.results?.[0].alternatives?.[0].transcript;
       } else {
         throw new Error('stt failed to transcribe to audio to text');
       }

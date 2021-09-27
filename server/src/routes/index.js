@@ -1,6 +1,4 @@
-const AzureFaceAPI = require('../api/azure/AzureFaceAPI');
-const EmpathClient = require('../api/empath/EmpathWebAPI');
-const WatsonAPI = require('../api/watson/WatsonAPI');
+const {AzureFaceAPI, WatsonAPI, EmpathWebAPI }  = require('../api/');
 
 const router = require('express').Router();
 
@@ -22,7 +20,7 @@ router.post('/analyze', async (req, res) => {
     const averages = faceClient.computeAverageEmotions(faceResults);
 
     const decodedAudio = faceClient.decodeBase64Image(voiceAudio);
-    const empathResults = await EmpathClient.analyzeAudio(decodedAudio.data);
+    const empathResults = await EmpathWebAPI.analyzeAudio(decodedAudio.data);
     const watsonResults = await watsonClient.analyzeSemanticTone(decodedAudio.data);
 
     res.json({
