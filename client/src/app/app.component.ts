@@ -156,13 +156,12 @@ export class AppComponent implements OnInit {
                         })
                         .subscribe(
                           (result) => {
+                            this.apiResponsePending = false;
                             this.emotionData = result;
                           },
                           (e) => {
-                            console.error(e);
-                          },
-                          () => {
                             this.apiResponsePending = false;
+                            console.error(e);
                           }
                         );
                     }.bind(this);
