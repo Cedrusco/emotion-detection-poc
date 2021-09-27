@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
 
   @ViewChild('userVideoStream') userVideoStream;
   @ViewChild('canvasToRenderUserImage') canvasToRenderUserImage;
-  @ViewChild('audioPlayer') audioPlayer;
+  // @ViewChild('audioPlayer') audioPlayer;
 
   constructor(public analyzer: AnalyzerService) {}
 
@@ -51,7 +51,7 @@ export class AppComponent implements OnInit {
       this.canvasToRenderUserImage.nativeElement
     );
 
-    this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
+    // this.audioPlayerElement = <HTMLAudioElement>this.audioPlayer.nativeElement;
 
     this.imageContext = this.canvasNativeElement.getContext('2d');
 
@@ -88,7 +88,7 @@ export class AppComponent implements OnInit {
   startRecognition() {
     this.disableRecord = true;
     this.faceImages = [];
-    this.audioPlayerElement.src = '';
+    // this.audioPlayerElement.src = '';
     this.emotionData = null;
     this.speechRecognition.start();
     this.analyzeVoice();
@@ -139,24 +139,13 @@ export class AppComponent implements OnInit {
 
                     const audioBlob = new Blob([wav], { type: 'audio/wav' });
 
-                    this.audioPlayerElement.src =
-                      window.URL.createObjectURL(audioBlob);
-
-                    // const formData = new FormData();
-
-                    // formData.append(
-                    //   'faceImages',
-                    //   this.faceImages.map(
-                    //     (image) => new Blob([image], { type: 'image/jpeg' }),
-                    //     {
-                    //       type: 'image/jpeg',
-                    //     }
-                    //   )
-                    // );
+                    // this.audioPlayerElement.src =
+                    //   window.URL.createObjectURL(audioBlob);
 
                     var reader = new window.FileReader();
                     reader.readAsDataURL(audioBlob);
                     let audioBase64;
+                    
                     reader.onloadend = function () {
                       audioBase64 = reader.result;
                       this.apiResponsePending = true
@@ -167,12 +156,13 @@ export class AppComponent implements OnInit {
                         })
                         .subscribe(
                           (result) => {
-                            this.apiResponsePending = false;
                             this.emotionData = result;
                           },
                           (e) => {
-                            this.apiResponsePending = false;
                             console.error(e);
+                          },
+                          () => {
+                            this.apiResponsePending = false;
                           }
                         );
                     }.bind(this);

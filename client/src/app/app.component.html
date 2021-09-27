@@ -1,5 +1,5 @@
 <div id="wrapper-container">
-  <div class="info">
+  <!-- <div class="info">
     <div id="audio" [ngClass]="{ hide: !audioPlayerElement.src }">
       <audio #audioPlayer type="audio/wav" controls></audio>
     </div>
@@ -12,7 +12,7 @@
         </li>
       </ul>
     </div>
-  </div>
+  </div> -->
   <div id="main-container" style="text-align: center">
     <mat-card [ngClass]="{ 'custom-card': true }">
       <h1>
@@ -40,7 +40,7 @@
       id="spinner"
       color="accent"
       mode="indeterminate"
-      *ngIf="apiResponsePending"
+      [ngClass]="{ 'hide': !apiResponsePending }"
     ></mat-progress-spinner>
     <div *ngIf="emotionData">
       <h4>Emotion Data</h4>
