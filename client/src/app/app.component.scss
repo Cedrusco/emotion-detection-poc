@@ -1,7 +1,8 @@
 #wrapper-container {
   display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 #main-container {
@@ -30,9 +31,6 @@
 .info {
   padding-top: 12px;
   margin-top: 24px;
-  width: 25%;
-  height: 90vh;
-  overflow: scroll;
 }
 
 .custom-card {

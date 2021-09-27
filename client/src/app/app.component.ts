@@ -60,7 +60,7 @@ export class AppComponent implements OnInit {
 
     navigator.mediaDevices
       .getUserMedia({
-        video: { width: { ideal: 500 }, height: { ideal: 500 } },
+        video: { width: { ideal: 500 }, height: { ideal: 400 } },
       })
       .then((stream) => {
         this.videoNativeElement.srcObject = stream;
