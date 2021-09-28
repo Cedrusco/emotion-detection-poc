@@ -3,6 +3,7 @@ const WatsonAPI = require('../watson/WatsonAPI');
 const EmpathWebAPI = require('../empath/EmpathWebAPI');
 
 const { emotionMap } = require('../analyze/analyze.constants');
+const { decodeBase64 } = require('../../util');
 
 class AnalyzeAPI {
   results;
@@ -17,14 +18,14 @@ class AnalyzeAPI {
     const faceResults = [];
 
     for (let i = 0; i < faceImages.length; i++) {
-      const decodedImage = this.faceClient.decodeBase64Image(faceImages[i]);
+      const decodedImage = decodeBase64(faceImages[i]);
       const result = await this.faceClient.analyzeFace(decodedImage.data);
       if (result) faceResults.push(result);
     }
 
     const averages = this.faceClient.computeAverageEmotions(faceResults);
 
-    const decodedAudio = this.faceClient.decodeBase64Image(voiceAudio);
+    const decodedAudio = decodeBase64(voiceAudio);
     const empathResults = await this.empathClient.analyzeAudio(
       decodedAudio.data
     );
@@ -97,7 +98,7 @@ class AnalyzeAPI {
   }
 
   _calculateSemanticEmotion(resultObject, semanticWeight) {
-    const rawData = this.result?.watsonToneAnalyzerResults?.toneResult?.document_tone?.tones;
+    const rawData = this.result?.watsonToneAnalyzerResults?.toneResult?.['document_tone']?.tones;
 
     rawData.forEach(tone => {
       if (!resultObject[emotionMap[tone.tone_id]]) {
