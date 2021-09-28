@@ -40,11 +40,15 @@
       id="spinner"
       color="accent"
       mode="indeterminate"
-      [ngClass]="{ 'hide': !apiResponsePending }"
+      [ngClass]="{ hide: !apiResponsePending }"
     ></mat-progress-spinner>
     <div *ngIf="emotionData">
-      <h4>Emotion Data</h4>
-      <pre>{{ emotionData | json }}</pre>
+      <mat-card [ngClass]="{ 'custom-card': true }">
+        <h3>Emotion Detected</h3>
+        <mat-card-content>
+          <pre>{{ emotionData?.emotion }}</pre>
+        </mat-card-content>
+      </mat-card>
     </div>
   </div>
 </div>
