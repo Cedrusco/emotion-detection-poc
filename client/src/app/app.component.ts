@@ -42,7 +42,7 @@ export class AppComponent implements OnInit {
 
   constructor(public analyzer: AnalyzerService) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.videoNativeElement = <HTMLVideoElement>(
       this.userVideoStream.nativeElement
     );
@@ -58,13 +58,11 @@ export class AppComponent implements OnInit {
     this.speechRecognition = new (<any>window).webkitSpeechRecognition();
     this.audioContext = new AudioContext({ sampleRate: 11025 });
 
-    navigator.mediaDevices
-      .getUserMedia({
-        video: { width: { ideal: 500 }, height: { ideal: 400 } },
-      })
-      .then((stream) => {
-        this.videoNativeElement.srcObject = stream;
-      });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 500 }, height: { ideal: 400 } },
+    });
+
+    this.videoNativeElement.srcObject = stream;
 
     // hands free might be possible.
     // have not gotten this to work yet.
@@ -96,104 +94,50 @@ export class AppComponent implements OnInit {
     this.speechRecognition.onresult = (event) => {
       this.disableRecord = false;
       this.mediaRecorder.stop();
-      this.apiResponsePending = true
+      this.apiResponsePending = true;
       clearInterval(this.intervalId);
       this.intervalId = '';
     };
   }
 
-  analyzeVoice() {
-    navigator.mediaDevices
-      .getUserMedia({
+  async analyzeVoice() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: false,
         audio: { channelCount: 1, sampleRate: 11025 },
-      })
-      .then(
-        (stream) => {
-          this.recordedChunks = [];
-          this.mediaRecorder = new MediaRecorder(stream, {
-            mimeType: 'audio/webm',
-          });
+      });
 
-          this.mediaRecorder.addEventListener(
-            'dataavailable',
-            function (e) {
-              if (e.data.size > 0) this.recordedChunks.push(e.data);
-            }.bind(this)
-          );
+      this.recordedChunks = [];
+      this.mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm',
+      });
 
-          this.mediaRecorder.addEventListener(
-            'stop',
-            function () {
-              const fileReader = new FileReader();
-
-              // Set up file reader on loaded end event
-              fileReader.onloadend = () => {
-                const arrayBuffer = fileReader.result as ArrayBuffer;
-
-                // Convert array buffer into audio buffer
-                this.audioContext.decodeAudioData(
-                  arrayBuffer,
-                  (audioBuffer) => {
-                    // Do something with audioBuffer
-                    const wav = toWav(audioBuffer);
-
-                    const audioBlob = new Blob([wav], { type: 'audio/wav' });
-
-                    // this.audioPlayerElement.src =
-                    //   window.URL.createObjectURL(audioBlob);
-
-                    var reader = new window.FileReader();
-                    reader.readAsDataURL(audioBlob);
-                    let audioBase64;
-                    
-                    reader.onloadend = function () {
-                      audioBase64 = reader.result;
-                      this.analyzer
-                        .analyze({
-                          voiceAudio: audioBase64,
-                          faceImages: this.faceImages,
-                        })
-                        .subscribe(
-                          (result) => {
-                            this.apiResponsePending = false;
-                            this.emotionData = result;
-                          },
-                          (e) => {
-                            this.apiResponsePending = false;
-                            console.error(e);
-                          }
-                        );
-                    }.bind(this);
-                  }
-                );
-              };
-
-              //Load blob
-              fileReader.readAsArrayBuffer(
-                new Blob(this.recordedChunks, {
-                  type: this.mediaRecorder.mimeType,
-                })
-              );
-            }.bind(this)
-          );
-
-          this.mediaRecorder.start();
-          this.intervalId = setInterval(this.analyzeFace.bind(this), 500);
-
-          setTimeout(() => {
-            if (this.intervalId) {
-              clearInterval(this.intervalId);
-              this.intervalId = '';
-              this.disableRecord = false;
-              this.mediaRecorder.stop();
-            }
-          }, 5000);
-        },
-        (e) => {
-          alert('Voice input is not available.');
-        }
+      this.mediaRecorder.addEventListener(
+        'dataavailable',
+        function (e) {
+          if (e.data.size > 0) this.recordedChunks.push(e.data);
+        }.bind(this)
       );
+
+      this.mediaRecorder.addEventListener(
+        'stop',
+        this.processUserData.bind(this)
+      );
+
+      this.mediaRecorder.start();
+      this.intervalId = setInterval(this.analyzeFace.bind(this), 500);
+
+      setTimeout(() => {
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+          this.intervalId = '';
+          this.disableRecord = false;
+          this.mediaRecorder.stop();
+        }
+      }, 5000);
+    } catch (e) {
+      alert('Voice input is not available.');
+    }
   }
 
   analyzeFace() {
@@ -217,5 +161,55 @@ export class AppComponent implements OnInit {
         this.faceImages.push(userImage);
       }
     });
+  }
+
+  processUserData() {
+    const fileReader = new FileReader();
+
+    // Set up file reader on loaded end event
+    fileReader.onloadend = () => {
+      const arrayBuffer = fileReader.result as ArrayBuffer;
+
+      // Convert array buffer into audio buffer
+      this.audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+        // Do something with audioBuffer
+        const wav = toWav(audioBuffer);
+
+        const audioBlob = new Blob([wav], { type: 'audio/wav' });
+
+        // this.audioPlayerElement.src =
+        //   window.URL.createObjectURL(audioBlob);
+
+        var reader = new window.FileReader();
+        reader.readAsDataURL(audioBlob);
+        let audioBase64;
+
+        reader.onloadend = function () {
+          audioBase64 = reader.result;
+          this.analyzer
+            .analyze({
+              voiceAudio: audioBase64,
+              faceImages: this.faceImages,
+            })
+            .subscribe(
+              (result) => {
+                this.apiResponsePending = false;
+                this.emotionData = result;
+              },
+              (e) => {
+                this.apiResponsePending = false;
+                console.error(e);
+              }
+            );
+        }.bind(this);
+      });
+    };
+
+    //Load blob
+    fileReader.readAsArrayBuffer(
+      new Blob(this.recordedChunks, {
+        type: this.mediaRecorder.mimeType,
+      })
+    );
   }
 }
