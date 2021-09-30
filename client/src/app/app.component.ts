@@ -90,14 +90,6 @@ export class AppComponent implements OnInit {
     this.emotionData = null;
     this.speechRecognition.start();
     this.analyzeVoice();
-
-    this.speechRecognition.onresult = (event) => {
-      this.disableRecord = false;
-      this.mediaRecorder.stop();
-      this.apiResponsePending = true;
-      clearInterval(this.intervalId);
-      this.intervalId = '';
-    };
   }
 
   async analyzeVoice() {
@@ -127,14 +119,10 @@ export class AppComponent implements OnInit {
       this.mediaRecorder.start();
       this.intervalId = setInterval(this.analyzeFace.bind(this), 500);
 
-      setTimeout(() => {
-        if (this.intervalId) {
-          clearInterval(this.intervalId);
-          this.intervalId = '';
-          this.disableRecord = false;
-          this.mediaRecorder.stop();
-        }
-      }, 5000);
+      this.speechRecognition.onresult = (event) => {
+        this.endRecording();
+      };
+      setTimeout(this.endRecording, 5000);
     } catch (e) {
       alert('Voice input is not available.');
     }
@@ -211,5 +199,15 @@ export class AppComponent implements OnInit {
         type: this.mediaRecorder.mimeType,
       })
     );
+  }
+
+  endRecording() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.apiResponsePending = true;
+      this.disableRecord = false;
+      this.intervalId = '';
+      this.mediaRecorder.stop();
+    }
   }
 }
