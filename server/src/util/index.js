@@ -2,7 +2,7 @@ function decodeBase64(dataString) {
   var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
     decodedString = {};
 
-  if (matches.length !== 3) {
+  if (!matches || matches.length !== 3) {
     throw new Error('Invalid input string');
   }
 
