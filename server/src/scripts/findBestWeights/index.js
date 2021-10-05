@@ -15,55 +15,60 @@ const weights = [
   [1, 0, 0],
 ];
 
-const performanceTracker = {};
+async function findBestWeights(sampleData, weights) {
+  const performanceTracker = {};
 
-const analyzeAPI = new AnalyzeAPI();
+  const analyzeAPI = new AnalyzeAPI();
 
-// loop over sampleData
-sampleData.forEach(async (sample) => {
-  // call analyze once.
-  const { faceImages, voiceAudio } = sample;
+  // loop over sampleData
+  for (let i = 0; i < sampleData.length; i++) {
+    const sample = sampleData[i];
+    const { faceImages, voiceAudio } = sample;
 
-  try {
-    await analyzeAPI.analyze(faceImages, voiceAudio);
-  } catch (e) {
-    console.error(e);
-  }
+    try {
+      // call analyze once.
+      await analyzeAPI.analyze(faceImages, voiceAudio);
 
-  // call calculateEmotion for each possible ratio of weights.
-  weights.forEach((weightArr, index) => {
-    const [faceWeight, audioWeight, semanticWeight] = weightArr;
+      // call calculateEmotion for each possible ratio of weights.
+      weights.forEach((weightArr, index) => {
+        const [faceWeight, audioWeight, semanticWeight] = weightArr;
 
-    const emotion = analyzeAPI.calculateEmotion(
-      faceWeight,
-      audioWeight,
-      semanticWeight
-    );
+        const emotion = analyzeAPI.calculateEmotion(
+          faceWeight,
+          audioWeight,
+          semanticWeight
+        );
 
-    // keep track of performance for each weight
-    if (emotion === sample.emotion) {
-      // identified emotion correctly.
-      performanceTracker[index] = !performanceTracker[index]
-        ? 0
-        : performanceTracker[index] + 1;
-    }
-  });
-});
-
-// print weights with best performance
-let maxKey,
-  maxValue = -1;
-for (let key in performanceTracker) {
-  if ({}.hasOwnProperty.call(performanceTracker, key)) {
-    if (performanceTracker[key] > maxValue) {
-      maxKey = key;
-      maxValue = performanceTracker[key];
+        // keep track of performance for each weight
+        if (emotion === sample.emotion) {
+          // identified emotion correctly.
+          performanceTracker[index] = !performanceTracker[index]
+            ? 1
+            : performanceTracker[index] + 1;
+        }
+      });
+    } catch (e) {
+      console.error(e);
     }
   }
+
+  // print weights with best performance
+  let maxKey,
+    maxValue = -1;
+  for (let key in performanceTracker) {
+    if ({}.hasOwnProperty.call(performanceTracker, key)) {
+      if (performanceTracker[key] > maxValue) {
+        maxKey = key;
+        maxValue = performanceTracker[key];
+      }
+    }
+  }
+
+  console.log(
+    `Best weight ratio is ${weights[maxKey]} with a performance of ${
+      100 * (maxValue / sampleData.length)
+    }% correct emotion detections.`
+  );
 }
 
-console.log(
-  `Best weight ratio is ${weights[maxKey]} with a performance of ${
-    100 * (maxValue / sampleData.length)
-  }% correct emotion detections.`
-);
+findBestWeights(sampleData, weights);

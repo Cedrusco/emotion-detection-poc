@@ -6,7 +6,7 @@ const { emotionMap } = require('../analyze/analyze.constants');
 const { decodeBase64 } = require('../../util');
 
 class AnalyzeAPI {
-  results;
+  result;
 
   constructor() {
     this.faceClient = new AzureFaceAPI();
